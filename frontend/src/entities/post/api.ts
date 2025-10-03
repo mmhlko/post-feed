@@ -23,7 +23,6 @@ export const postApi = {
   createPost: async (data: CreatePostRequest): Promise<Post> => {
     const formData = new FormData();
     formData.append("text", data.text);
-    formData.append("userId", data.userId);
 
     if (data.images) {
       data.images.forEach((image) => {

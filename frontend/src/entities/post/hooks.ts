@@ -26,10 +26,6 @@ export const usePostsInfinite = (sort: 'asc' | 'desc' = 'desc') => {
     initialPageParam: 0,
     getNextPageParam: (lastPage, allPages) => {
       const loaded = allPages.flatMap(p => p.items).length;
-      console.log({
-        lastPage,
-        loaded,
-      })
       return loaded < lastPage.total ? loaded : undefined;
     },
   });

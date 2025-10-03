@@ -2,7 +2,6 @@ import {
   Body,
   Controller,
   Get,
-  Param,
   Patch,
   Post,
   UploadedFile,
@@ -15,6 +14,7 @@ import { FileInterceptor } from '@nestjs/platform-express';
 import { diskStorage } from 'multer';
 import { extname } from 'path';
 import { AccessGuard } from '../auth/guards/access.guard';
+import { GetUser } from '../auth/decorators/get-user.decorator';
 
 // function filenameGenerator(
 //   _: any,
@@ -29,20 +29,20 @@ import { AccessGuard } from '../auth/guards/access.guard';
 export class ProfileController {
   constructor(private readonly userService: UsersService) {}
 
-  @Get(':id')
-  getProfile(@Param('id') id: string) {
-    console.log('getProfile', id);
-    return this.userService.findById(id);
+  @Get()
+  getProfile(@GetUser('userId') userId: string) {
+    return this.userService.findById(userId);
   }
 
-  @Patch(':id')
-  updateProfile(@Param('id') id: string, @Body() dto: UpdateProfileDto) {
-    console.log('updateProfile', id, dto);
-
-    return this.userService.update(id, dto);
+  @Patch()
+  updateProfile(
+    @GetUser('userId') userId: string,
+    @Body() dto: UpdateProfileDto,
+  ) {
+    return this.userService.update(userId, dto);
   }
 
-  @Post(':id/avatar')
+  @Post('avatar')
   @UseInterceptors(
     FileInterceptor('file', {
       storage: diskStorage({
@@ -57,10 +57,10 @@ export class ProfileController {
     }),
   )
   async uploadAvatar(
-    @Param('id') id: string,
+    @GetUser('userId') userId: string,
     @UploadedFile() file: Express.Multer.File,
   ) {
     const url = file ? `/uploads/avatars/${file.filename}` : '';
-    return this.userService.updateAvatar(id, url);
+    return this.userService.updateAvatar(userId, url);
   }
 }

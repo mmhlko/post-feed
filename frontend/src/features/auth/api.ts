@@ -1,29 +1,37 @@
 import { apiClient } from '@/shared/api/axios';
+import { getAuthStore } from './store';
 
-export type RegisterRequest = {
+export type SignupRequest = {
   firstName: string;
   lastName: string;
   email: string;
   password: string;
 };
 
-export type LoginRequest = { email: string; password: string };
+export type LoginRequest = {
+  email: string;
+  password: string;
+};
 
 export const authApi = {
-  async register(data: RegisterRequest) {
-    const res = await apiClient.post('/auth/register', data, { withCredentials: true });
-    return res.data as { user: Record<string, unknown>; accessToken: string };
+  signup: async (data: SignupRequest) => {
+    const res = await apiClient.post<{ user: Record<string, unknown>; accessToken: string }>('/auth/signup', data);
+    return res.data;
   },
-  async login(data: LoginRequest) {
-    const res = await apiClient.post('/auth/login', data, { withCredentials: true });
-    return res.data as { user: Record<string, unknown>; accessToken: string };
+
+  login: async (data: LoginRequest) => {
+    const res = await apiClient.post<{ user: Record<string, unknown>; accessToken: string }>('/auth/login', data);
+    return res.data;
   },
-  async refresh() {
-    const res = await apiClient.get('/auth/refresh', { withCredentials: true });
-    return res.data as { accessToken: string };
+
+  refresh: async () => {
+    const res = await apiClient.get<{ accessToken: string }>('/auth/refresh');
+    return res.data;
   },
-  async logout() {
-    const res = await apiClient.post('/auth/logout', {}, { withCredentials: true });
-    return res.data as { ok: boolean };
+
+  logout: async () => {
+    const res = await apiClient.post<{ ok: boolean }>('/auth/logout');
+    getAuthStore().logout();
+    return res.data;
   },
 };

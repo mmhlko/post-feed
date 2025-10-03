@@ -23,7 +23,9 @@ export class UsersService {
 
   async updateRefreshToken(userId: string, refreshToken: string | null) {
     const user = await this.findById(userId);
-    user.hashedRefreshToken = refreshToken;
+    if (refreshToken) {
+      user.hashedRefreshToken = refreshToken;
+    }
     return user.save();
   }
 

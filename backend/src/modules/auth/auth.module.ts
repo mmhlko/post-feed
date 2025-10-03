@@ -7,8 +7,14 @@ import { RefreshTokenStrategy } from './strategies/refresh.strategy';
 import { AuthController } from './auth.controller';
 
 @Module({
-  imports: [UsersModule, JwtModule.register({})],
-  providers: [AuthService, AccessTokenStrategy, RefreshTokenStrategy],
+  imports: [
+    UsersModule,
+    JwtModule.register({
+      secret: process.env.JWT_ACCESS_SECRET || 'ACCESS_SECRET',
+    }),
+  ],
   controllers: [AuthController],
+  providers: [AuthService, AccessTokenStrategy, RefreshTokenStrategy],
+  exports: [AuthService],
 })
 export class AuthModule {}

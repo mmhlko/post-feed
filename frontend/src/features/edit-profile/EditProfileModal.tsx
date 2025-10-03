@@ -1,6 +1,6 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect } from "react";
 import { UpdateUserRequest, User } from "@/entities/user/types";
-import { useUpdateProfile, useUploadAvatar } from "@/entities/user/hooks";
+import { useUpdateProfile } from "@/entities/user/hooks";
 import {
   Dialog,
   DialogContent,
@@ -12,7 +12,7 @@ import { Input } from "@/shared/ui/input";
 import { Textarea } from "@/shared/ui/textarea";
 import { Label } from "@/shared/ui/label";
 import { useToast } from "@/hooks/use-toast";
-import { config } from "@/shared/config";
+import { formatDate } from "@/shared/lib/utils";
 
 interface EditProfileModalProps {
   open: boolean;
@@ -33,11 +33,7 @@ export const EditProfileModal = ({
     birthDate: "",
     about: "",
   });
-  const [avatarFile, setAvatarFile] = useState<File | null>(null);
-  const [avatarPreview, setAvatarPreview] = useState<string | null>(null);
-  const fileInputRef = useRef<HTMLInputElement>(null);
   const updateProfileMutation = useUpdateProfile();
-  const uploadAvatarMutation = useUploadAvatar();
   const { toast } = useToast();
 
   useEffect(() => {
@@ -47,11 +43,9 @@ export const EditProfileModal = ({
         lastName: user.lastName,
         email: user.email,
         phone: user.phone || "",
-        birthDate: user.birthDate || "",
+        birthDate: formatDate(user.birthDate, 'birth') || "",
         about: user.about || "",
       });
-      setAvatarFile(null);
-      setAvatarPreview(null);
     }
   }, [user, open]);
 
@@ -70,86 +64,12 @@ export const EditProfileModal = ({
     }
   };
 
-  const handleAvatarClick = () => {
-    fileInputRef.current?.click();
-  };
-
-  const handleAvatarChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0] || null;
-    if (!file) return;
-
-    // Show instant preview
-    setAvatarFile(file);
-    setAvatarPreview(URL.createObjectURL(file));
-
-    try {
-      await uploadAvatarMutation.mutateAsync(file);
-      setAvatarFile(null);
-      setAvatarPreview(null);
-      toast({ title: "Success", description: "Avatar updated successfully!" });
-    } catch (error) {
-      toast({
-        title: "Error",
-        description: "Failed to upload avatar",
-        variant: "destructive",
-      });
-    } finally {
-      // reset the input so selecting the same file again still triggers change
-      if (fileInputRef.current) fileInputRef.current.value = "";
-    }
-  };
-
-  const currentAvatarSrc = user?.avatarUrl
-    ? `${config.API_BASE_URL}${user.avatarUrl}`
-    : undefined;
-
   return (
     <Dialog open={open} onOpenChange={onClose}>
-      <DialogContent className="sm:max-w-[600px]">
+      <DialogContent className="sm:max-w-[600px]" aria-describedby={undefined}>
         <DialogHeader>
           <DialogTitle>Edit Profile</DialogTitle>
         </DialogHeader>
-
-        <div className="space-y-2 mt-2">
-          <Label>Avatar</Label>
-          <div className="flex items-center gap-4">
-            <button
-              type="button"
-              onClick={handleAvatarClick}
-              className="rounded-full"
-            >
-              <img
-                src={
-                  avatarPreview ||
-                  currentAvatarSrc ||
-                  "https://via.placeholder.com/96x96?text=Avatar"
-                }
-                alt="Avatar preview"
-                className="w-24 h-24 rounded-full object-cover border"
-              />
-            </button>
-            <div className="flex items-center gap-2">
-              <input
-                ref={fileInputRef}
-                type="file"
-                accept="image/*"
-                className="hidden"
-                onChange={handleAvatarChange}
-              />
-              {/* Optional manual upload button fallback */}
-              <Button
-                type="button"
-                onClick={handleAvatarClick}
-                disabled={uploadAvatarMutation.isPending}
-              >
-                {uploadAvatarMutation.isPending
-                  ? "Uploading..."
-                  : "Change Avatar"}
-              </Button>
-            </div>
-          </div>
-        </div>
-
         <form onSubmit={handleSubmit} className="space-y-4 mt-4">
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">

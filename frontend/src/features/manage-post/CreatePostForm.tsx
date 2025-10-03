@@ -39,7 +39,6 @@ export const CreatePostForm = ({ onSuccess }: CreatePostFormProps) => {
 
       await createPostMutation.mutateAsync({
         text: text.trim(),
-        userId: "9992eeb8-0ee5-45b4-a4f1-0846749201e4", // TODO: Get from auth context
         images: files,
       });
 

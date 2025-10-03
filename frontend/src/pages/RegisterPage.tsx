@@ -22,7 +22,7 @@ export const RegisterPage = () => {
     setError(null);
     setLoading(true);
     try {
-      const { accessToken } = await authApi.register(form);
+      const { accessToken } = await authApi.signup(form);
       setToken(accessToken);
       navigate('/');
     } catch (err: any) {

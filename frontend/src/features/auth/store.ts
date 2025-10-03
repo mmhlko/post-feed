@@ -1,3 +1,4 @@
+import { queryClient } from '@/shared/api/query-client';
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 
@@ -14,11 +15,11 @@ export const useAuthStore = create<AuthState>()(
       token: null,
       isAuthenticated: false,
       setToken: (token: string) => {
-        localStorage.setItem('auth_token', token);
+        // localStorage.setItem('auth_token', token);
         set({ token, isAuthenticated: true });
       },
       logout: () => {
-        localStorage.removeItem('auth_token');
+        queryClient.clear();
         set({ token: null, isAuthenticated: false });
       },
     }),
@@ -27,3 +28,5 @@ export const useAuthStore = create<AuthState>()(
     }
   )
 );
+
+export const getAuthStore = () => useAuthStore.getState();

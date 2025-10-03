@@ -1,8 +1,10 @@
+import { User } from "../user";
+
 export interface Post {
   id: string;
   text: string;
   images: PostImage[];
-  userId: string;
+  user: Pick<User, 'id' | 'firstName' | 'lastName' | 'avatarUrl'>;
   createdAt: string;
   updatedAt?: string;
 }
@@ -13,7 +15,6 @@ export interface PostImage {
 }
 export interface CreatePostRequest {
   text: string;
-  userId: string;
   images?: File[];
 }
 

@@ -9,7 +9,7 @@ export const USER_QUERY_KEYS = {
 export const useUserProfile = () => {
   return useQuery({
     queryKey: USER_QUERY_KEYS.profile,
-    queryFn: () => userApi.getProfile("9992eeb8-0ee5-45b4-a4f1-0846749201e4"),
+    queryFn: () => userApi.getProfile(),
   });
 };
 
@@ -18,7 +18,7 @@ export const useUpdateProfile = () => {
 
   return useMutation({
     mutationFn: (data: UpdateUserRequest) =>
-      userApi.updateProfile("9992eeb8-0ee5-45b4-a4f1-0846749201e4", data),
+      userApi.updateProfile(data),
     onSuccess: (updatedUser: User) => {
       queryClient.setQueryData(USER_QUERY_KEYS.profile, updatedUser);
     },
@@ -30,7 +30,7 @@ export const useUploadAvatar = () => {
 
   return useMutation({
     mutationFn: (file: File) =>
-      userApi.uploadAvatar("9992eeb8-0ee5-45b4-a4f1-0846749201e4", file),
+      userApi.uploadAvatar(file),
     onSuccess: (updatedUser: User) => {
       queryClient.setQueryData(USER_QUERY_KEYS.profile, updatedUser);
     },

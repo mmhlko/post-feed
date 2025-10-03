@@ -5,8 +5,15 @@ export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
 }
 
-export const formatDate = (date: string | Date) => {
+export const formatDate = (date: string | Date, type?: 'birth' | 'full') => {
   const dateObj = typeof date === 'string' ? new Date(date) : date;
+
+  if (type === 'birth') {
+    // возвращаем только yyyy-MM-dd
+    return dateObj.toISOString().split('T')[0];
+  }
+
+  // по умолчанию форматируем с датой и временем
   return new Intl.DateTimeFormat('en-US', {
     year: 'numeric',
     month: 'short',

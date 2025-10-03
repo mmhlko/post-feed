@@ -18,12 +18,12 @@ export class PostImageModel extends Model<PostImageModel> {
   declare id: string;
 
   @Column({ allowNull: false, type: DataType.STRING })
-  url: string;
+  declare url: string;
 
   @ForeignKey(() => PostModel)
   @Column({ type: DataType.UUID, allowNull: false })
-  postId: string;
+  declare postId: string;
 
   @BelongsTo(() => PostModel)
-  post: PostModel;
+  declare post: PostModel;
 }

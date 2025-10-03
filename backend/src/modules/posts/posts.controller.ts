@@ -17,6 +17,7 @@ import { FilesInterceptor } from '@nestjs/platform-express';
 import { extname } from 'path';
 import { CreatePostDto, UpdatePostDto } from './dto/post.dto';
 import { AccessGuard } from '../auth/guards/access.guard';
+import { GetUser } from '../auth/decorators/get-user.decorator';
 
 const filenameGenerator = (
   req,
@@ -61,8 +62,9 @@ export class PostsController {
   create(
     @Body() body: CreatePostDto,
     @UploadedFiles() images: Express.Multer.File[],
+    @GetUser('userId') userId: string,
   ) {
-    return this.postsService.create(body, images);
+    return this.postsService.create(body, userId, images);
   }
 
   @Patch(':id')
@@ -71,12 +73,13 @@ export class PostsController {
     @Param('id') id: string,
     @Body() dto: UpdatePostDto,
     @UploadedFiles() images: Express.Multer.File[],
+    @GetUser('userId') userId: string,
   ) {
-    return this.postsService.update(id, dto, images);
+    return this.postsService.update(id, dto, userId, images);
   }
 
   @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.postsService.delete(id);
+  remove(@Param('id') id: string, @GetUser('userId') userId: string) {
+    return this.postsService.delete(id, userId);
   }
 }

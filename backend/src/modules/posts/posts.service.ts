@@ -1,4 +1,8 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import {
+  Injectable,
+  NotFoundException,
+  ForbiddenException,
+} from '@nestjs/common';
 import { InjectModel } from '@nestjs/sequelize';
 import { PostModel } from './post.model';
 import { PostImageModel } from './post-image.model';
@@ -9,6 +13,7 @@ import {
   Order,
 } from 'sequelize';
 import { CreatePostDto, UpdatePostDto } from './dto/post.dto';
+import { UserModel } from '../users/user.model';
 type ListParams = { limit: number; offset: number; sort: string };
 
 @Injectable()
@@ -22,7 +27,14 @@ export class PostsService {
   async list({ limit, offset, sort }: ListParams) {
     const order: Order = [['createdAt', sort?.toUpperCase()]];
     const { rows, count } = await this.postModel.findAndCountAll({
-      include: [PostImageModel],
+      attributes: { exclude: ['userId'] },
+      include: [
+        PostImageModel,
+        {
+          model: UserModel,
+          attributes: ['id', 'firstName', 'lastName', 'avatarUrl'],
+        },
+      ],
       limit,
       offset,
       order,
@@ -30,13 +42,29 @@ export class PostsService {
     return { items: rows, total: count };
   }
 
+  async findById(id: string) {
+    const post = await this.postModel.findByPk(id, {
+      attributes: { exclude: ['userId'] },
+      include: [
+        PostImageModel,
+        {
+          model: UserModel,
+          attributes: ['id', 'firstName', 'lastName', 'avatarUrl'],
+        },
+      ],
+    });
+    if (!post) throw new NotFoundException('Post not found');
+    return post;
+  }
+
   async create(
-    dto: CreatePostDto & { userId: string },
+    { text }: CreatePostDto,
+    userId: string,
     images?: Express.Multer.File[],
   ) {
     const post = await this.postModel.create({
-      userId: dto.userId,
-      text: dto.text,
+      userId,
+      text,
     } as InferCreationAttributes<PostModel>);
 
     if (images && images.length > 0) {
@@ -51,19 +79,18 @@ export class PostsService {
     return this.findById(post.id);
   }
 
-  async findById(id: string) {
+  async update(
+    id: string,
+    dto: UpdatePostDto,
+    userId: string,
+    images?: Express.Multer.File[],
+  ) {
     const post = await this.postModel.findByPk(id, {
       include: [PostImageModel],
     });
     if (!post) throw new NotFoundException('Post not found');
-    return post;
-  }
-
-  async update(id: string, dto: UpdatePostDto, images?: Express.Multer.File[]) {
-    const post = await this.postModel.findByPk(id, {
-      include: [PostImageModel],
-    });
-    if (!post) throw new NotFoundException('Post not found');
+    if (post.userId !== userId)
+      throw new ForbiddenException('You are not allowed to update this post');
 
     if (dto.text) {
       post.text = dto.text;
@@ -87,11 +114,13 @@ export class PostsService {
     return this.findById(id);
   }
 
-  async delete(id: string) {
+  async delete(id: string, userId: string) {
     const post = await this.postModel.findByPk(id, {
       include: [PostImageModel],
     });
     if (!post) throw new NotFoundException('Post not found');
+    if (post.userId !== userId)
+      throw new ForbiddenException('You are not allowed to update this post');
 
     await this.postImageModel.destroy({ where: { postId: id } });
     await post.destroy();

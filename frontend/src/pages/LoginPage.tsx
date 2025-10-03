@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useAuthStore } from '@/features/auth/store';
 import { authApi } from '@/features/auth/api';
@@ -8,11 +8,18 @@ import { Input } from '@/shared/ui/input';
 
 export const LoginPage = () => {
   const navigate = useNavigate();
-  const setToken = useAuthStore((s) => s.setToken);
+  const { setToken, isAuthenticated } = useAuthStore();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  // Redirect if already authenticated
+  useEffect(() => {
+    if (isAuthenticated) {
+      navigate('/', { replace: true });
+    }
+  }, [isAuthenticated, navigate]);
 
   const onSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -20,8 +27,10 @@ export const LoginPage = () => {
     setLoading(true);
     try {
       const { accessToken } = await authApi.login({ email, password });
-      setToken(accessToken);
-      navigate('/');
+      if (accessToken) {
+        setToken(accessToken);
+        navigate('/');
+      }
     } catch (err: any) {
       setError(err?.response?.data?.message || 'Login failed');
     } finally {
@@ -51,7 +60,7 @@ export const LoginPage = () => {
             </Button>
           </form>
           <div className="mt-4 text-sm text-muted-foreground">
-            No account? <Link to="/register" className="text-primary">Create one</Link>
+            No account? <Link to="/signup" className="text-primary">Create one</Link>
           </div>
         </CardContent>
       </Card>

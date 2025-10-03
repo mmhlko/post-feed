@@ -154,5 +154,6 @@ data
 /node_modules
 /.idea/*.*
 /.idea/*/*.*
+/backend/uploads
 
 coverage

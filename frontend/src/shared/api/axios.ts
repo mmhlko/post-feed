@@ -1,32 +1,33 @@
-import axios from 'axios';
-import { config } from '../config';
+import axios, { AxiosRequestConfig } from 'axios';
+import { getAuthStore } from '@/features/auth/store';
+
+interface AxiosRequestConfigWithRetry extends AxiosRequestConfig {
+  _retry?: boolean;
+}
 
 export const apiClient = axios.create({
-  baseURL: config.API_BASE_URL,
+  baseURL: import.meta.env.VITE_API_BASE_URL,
   timeout: 10000,
-  withCredentials: true,
+  withCredentials: true, // обязательно для httpOnly cookie
 });
 
-// Request interceptor for auth tokens
+// --- Request interceptor: ставим access token из zustand ---
 apiClient.interceptors.request.use((config) => {
-  const token = localStorage.getItem('auth_token');
+  const token = getAuthStore().token;
   if (token) {
     config.headers.Authorization = `Bearer ${token}`;
   }
   return config;
 });
 
-// Response interceptor for error handling
+// --- Response interceptor: для refresh ---
 let isRefreshing = false;
-let failedQueue: Array<{ resolve: (value?: unknown) => void; reject: (reason?: any) => void }> = [];
+let failedQueue: Array<{ resolve: (token?: string) => void; reject: (err?: any) => void }> = [];
 
 function processQueue(error: any, token: string | null = null) {
   failedQueue.forEach((prom) => {
-    if (error) {
-      prom.reject(error);
-    } else {
-      prom.resolve(token);
-    }
+    if (error) prom.reject(error);
+    else prom.resolve(token);
   });
   failedQueue = [];
 }
@@ -34,40 +35,49 @@ function processQueue(error: any, token: string | null = null) {
 apiClient.interceptors.response.use(
   (response) => response,
   async (error) => {
-    const originalRequest = error.config;
+    const originalRequest = error.config as AxiosRequestConfigWithRetry;
+    console.log('apiClient.interceptors.response', );
     if (error.response?.status === 401 && !originalRequest._retry) {
+      console.log('apiClient.interceptors.response', );
+      
       if (isRefreshing) {
-        return new Promise(function (resolve, reject) {
+        return new Promise((resolve, reject) => {
           failedQueue.push({ resolve, reject });
-        })
-          .then((token) => {
-            if (token) originalRequest.headers.Authorization = `Bearer ${token}`;
-            return apiClient(originalRequest);
-          })
-          .catch((err) => Promise.reject(err));
+        }).then((token) => {
+          if (token) originalRequest.headers.Authorization = `Bearer ${token}`;
+          return apiClient(originalRequest);
+        });
       }
 
       originalRequest._retry = true;
       isRefreshing = true;
+
       try {
-        const res = await apiClient.get('/auth/refresh', { withCredentials: true });
+        const res = await apiClient.get('/auth/refresh'); // cookie отправляется автоматически
         const newToken = res.data?.accessToken;
-        if (newToken) {
-          localStorage.setItem('auth_token', newToken);
-          apiClient.defaults.headers.common['Authorization'] = `Bearer ${newToken}`;
-          processQueue(null, newToken);
-          originalRequest.headers.Authorization = `Bearer ${newToken}`;
-        }
+
+        if (!newToken) throw new Error('No access token returned');
+
+        // обновляем token в zustand
+        getAuthStore().setToken(newToken);
+
+        // ставим токен в дефолтные заголовки и в текущий запрос
+        apiClient.defaults.headers.common['Authorization'] = `Bearer ${newToken}`;
+        originalRequest.headers.Authorization = `Bearer ${newToken}`;
+
+        processQueue(null, newToken);
+
         return apiClient(originalRequest);
       } catch (err) {
         processQueue(err, null);
-        localStorage.removeItem('auth_token');
-        window.location.href = '/login';
+        getAuthStore().logout();
+        // window.location.href = '/signup';
         return Promise.reject(err);
       } finally {
         isRefreshing = false;
       }
     }
+
     return Promise.reject(error);
-  },
+  }
 );
