@@ -6,6 +6,7 @@ import {
   Patch,
   Post,
   UploadedFile,
+  UseGuards,
   UseInterceptors,
 } from '@nestjs/common';
 import { UsersService } from './user.service';
@@ -13,6 +14,7 @@ import { UpdateProfileDto } from './dto/user.dto';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { diskStorage } from 'multer';
 import { extname } from 'path';
+import { AccessGuard } from '../auth/guards/access.guard';
 
 // function filenameGenerator(
 //   _: any,
@@ -22,7 +24,7 @@ import { extname } from 'path';
 //   const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1e9);
 //   cb(null, uniqueSuffix + extname(file.originalname));
 // }
-
+@UseGuards(AccessGuard)
 @Controller('user')
 export class ProfileController {
   constructor(private readonly userService: UsersService) {}

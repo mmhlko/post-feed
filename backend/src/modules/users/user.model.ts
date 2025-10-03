@@ -22,8 +22,14 @@ export class UserModel extends Model<UserModel> {
   @Column({ allowNull: true, type: DataType.TEXT })
   declare about: string;
 
-  @Column({ allowNull: true })
+  @Column({ allowNull: false, unique: true })
   declare email: string;
+
+  @Column({ allowNull: false })
+  declare password: string;
+
+  @Column({ allowNull: true })
+  declare hashedRefreshToken: string;
 
   @Column({ allowNull: true })
   declare phone: string;

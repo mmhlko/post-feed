@@ -9,12 +9,14 @@ import {
   UseInterceptors,
   UploadedFiles,
   Patch,
+  UseGuards,
 } from '@nestjs/common';
 import { diskStorage } from 'multer';
 import { PostsService } from './posts.service';
 import { FilesInterceptor } from '@nestjs/platform-express';
 import { extname } from 'path';
 import { CreatePostDto, UpdatePostDto } from './dto/post.dto';
+import { AccessGuard } from '../auth/guards/access.guard';
 
 const filenameGenerator = (
   req,
@@ -36,7 +38,7 @@ const PostImagesInterceptor = (field = 'images', maxCount = 5) =>
       }),
     }),
   );
-
+@UseGuards(AccessGuard)
 @Controller('posts')
 export class PostsController {
   constructor(private readonly postsService: PostsService) {}
