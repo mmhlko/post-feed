@@ -14,6 +14,7 @@ export const apiClient = axios.create({
 // --- Request interceptor: ставим access token из zustand ---
 apiClient.interceptors.request.use((config) => {
   const token = getAuthStore().token;
+  
   if (token) {
     config.headers.Authorization = `Bearer ${token}`;
   }
@@ -36,10 +37,7 @@ apiClient.interceptors.response.use(
   (response) => response,
   async (error) => {
     const originalRequest = error.config as AxiosRequestConfigWithRetry;
-    console.log('apiClient.interceptors.response', );
     if (error.response?.status === 401 && !originalRequest._retry) {
-      console.log('apiClient.interceptors.response', );
-      
       if (isRefreshing) {
         return new Promise((resolve, reject) => {
           failedQueue.push({ resolve, reject });
@@ -54,6 +52,7 @@ apiClient.interceptors.response.use(
 
       try {
         const res = await apiClient.get('/auth/refresh'); // cookie отправляется автоматически
+
         const newToken = res.data?.accessToken;
 
         if (!newToken) throw new Error('No access token returned');

@@ -7,13 +7,21 @@ import { JwtService } from '@nestjs/jwt';
 import { UsersService } from '../users/user.service';
 import { LoginDto, SignupDto } from './dto/auth.dto';
 import * as bcrypt from 'bcrypt';
+import { ConfigService } from '@nestjs/config';
 
 @Injectable()
 export class AuthService {
+  private readonly jwtAccessSecret: string;
+  private readonly jwtRefreshSecret: string;
   constructor(
     private jwtService: JwtService,
     private usersService: UsersService,
-  ) {}
+    configService: ConfigService,
+  ) {
+    this.jwtAccessSecret = configService.get<string>('JWT_ACCESS_SECRET') || '';
+    this.jwtRefreshSecret =
+      configService.get<string>('JWT_REFRESH_SECRET') || '';
+  }
 
   async signup(dto: SignupDto) {
     const existing = await this.usersService.findByEmail(dto.email);
@@ -80,11 +88,14 @@ export class AuthService {
     const [accessToken, refreshToken] = await Promise.all([
       this.jwtService.signAsync(
         { userId, email },
-        { secret: process.env.JWT_ACCESS_SECRET, expiresIn: 10 },
+        {
+          secret: this.jwtAccessSecret,
+          expiresIn: 10,
+        },
       ),
       this.jwtService.signAsync(
         { userId, email },
-        { secret: process.env.JWT_REFRESH_SECRET, expiresIn: '7d' },
+        { secret: this.jwtRefreshSecret, expiresIn: '7d' },
       ),
     ]);
     return { accessToken, refreshToken };
