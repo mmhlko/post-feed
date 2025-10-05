@@ -4,7 +4,8 @@ export const config = {
 } as const;
 
 export const CONSTANTS = {
-  POSTS_PER_PAGE: 10,
+  POSTS_PER_PAGE: 5,
   MAX_IMAGES_PER_POST: 5,
   MAX_BIO_LENGTH: 500,
+  MAX_POST_LENGTH: 500,
 } as const;

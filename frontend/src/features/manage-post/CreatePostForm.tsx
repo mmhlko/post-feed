@@ -5,6 +5,7 @@ import { Card, CardContent } from "@/shared/ui/card";
 import { Button } from "@/shared/ui/button";
 import { Textarea } from "@/shared/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
+import { CONSTANTS } from "@/shared/config";
 
 interface UploadedFile {
   id: string;
@@ -63,10 +64,10 @@ export const CreatePostForm = ({ onSuccess }: CreatePostFormProps) => {
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = Array.from(e.target.files || []);
-    if (files.length + uploadedFiles.length > 5) {
+    if (files.length + uploadedFiles.length > CONSTANTS.MAX_IMAGES_PER_POST) {
       toast({
         title: "Warning",
-        description: "Maximum 5 images allowed",
+        description: `Maximum ${CONSTANTS.MAX_BIO_LENGTH} images allowed`,
         variant: "destructive",
       });
       return;
@@ -94,12 +95,12 @@ export const CreatePostForm = ({ onSuccess }: CreatePostFormProps) => {
             value={text}
             onChange={(e) => setText(e.target.value)}
             rows={3}
-            maxLength={1000}
+            maxLength={CONSTANTS.MAX_POST_LENGTH}
             className="resize-none"
             disabled={createPostMutation.isPending}
           />
           <p className="text-sm text-muted-foreground text-right">
-            {text.length}/1000
+            {text.length}/{CONSTANTS.MAX_POST_LENGTH}
           </p>
 
           <div className="space-y-3">
@@ -134,7 +135,7 @@ export const CreatePostForm = ({ onSuccess }: CreatePostFormProps) => {
               onChange={handleFileChange}
             />
 
-            {uploadedFiles.length < 5 && (
+            {uploadedFiles.length < CONSTANTS.MAX_IMAGES_PER_POST && (
               <Button
                 variant="outline"
                 onClick={() => fileInputRef.current?.click()}
@@ -142,7 +143,7 @@ export const CreatePostForm = ({ onSuccess }: CreatePostFormProps) => {
                 disabled={createPostMutation.isPending}
               >
                 <Plus className="h-4 w-4 mr-2" />
-                Add Images ({uploadedFiles.length}/5)
+                Add Images ({uploadedFiles.length}/{CONSTANTS.MAX_IMAGES_PER_POST})
               </Button>
             )}
           </div>

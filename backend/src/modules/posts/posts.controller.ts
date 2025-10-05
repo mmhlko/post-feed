@@ -14,21 +14,10 @@ import {
 import { diskStorage } from 'multer';
 import { PostsService } from './posts.service';
 import { FilesInterceptor } from '@nestjs/platform-express';
-import { extname } from 'path';
 import { CreatePostDto, UpdatePostDto } from './dto/post.dto';
 import { AccessGuard } from '../auth/guards/access.guard';
 import { GetUser } from '../auth/decorators/get-user.decorator';
-
-const filenameGenerator = (
-  req,
-  file: Express.Multer.File,
-  cb: (error: Error | null, filename: string) => void,
-) => {
-  const name = `${Date.now()}-${Math.random()
-    .toString(36)
-    .slice(2, 8)}${extname(file.originalname)}`;
-  cb(null, name);
-};
+import { filenameGenerator } from 'src/shared/utils/filename-generator';
 
 const PostImagesInterceptor = (field = 'images', maxCount = 5) =>
   UseInterceptors(

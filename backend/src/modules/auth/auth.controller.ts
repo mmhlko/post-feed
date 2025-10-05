@@ -17,9 +17,9 @@ import { type Response } from 'express';
 const setRefreshTokenCookie = (res: Response, refreshToken: string) => {
   res.cookie('refreshToken', refreshToken, {
     httpOnly: true,
-    path: '/auth/refresh', // только для refresh запроса
-    maxAge: 7 * 24 * 60 * 60 * 1000, // 7 дней
-    sameSite: 'lax', // защита от CSRF
+    path: '/auth/refresh', // only for refresh request
+    maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
+    sameSite: 'lax', // CSRF protection
   });
 };
 
@@ -43,19 +43,13 @@ export class AuthController {
     @Res({ passthrough: true }) res: Response,
   ) {
     const { accessToken, refreshToken } = await this.authService.login(dto);
-    res.cookie('refreshToken', refreshToken, {
-      httpOnly: true,
-      path: '/auth/refresh',
-      maxAge: 7 * 24 * 60 * 60 * 1000,
-      sameSite: 'lax',
-    });
+    setRefreshTokenCookie(res, refreshToken);
     return { accessToken };
   }
 
   @UseGuards(RefreshGuard)
   @Get('refresh')
   refresh(@GetUser() user: UserPayload) {
-    console.log('Refresh request received, user:', user);
     if (!user.refreshToken) {
       throw new UnauthorizedException('Refresh token missing');
     }

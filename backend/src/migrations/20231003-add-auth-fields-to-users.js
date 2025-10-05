@@ -5,7 +5,7 @@ module.exports = {
     await queryInterface.addColumn('users', 'password', {
       type: Sequelize.STRING,
       allowNull: false,
-      defaultValue: '', // временно для существующих записей
+      defaultValue: '', // temporary for existing records
     });
 
     await queryInterface.addColumn('users', 'hashedRefreshToken', {

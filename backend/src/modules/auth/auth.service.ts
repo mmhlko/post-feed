@@ -13,6 +13,8 @@ import { ConfigService } from '@nestjs/config';
 export class AuthService {
   private readonly jwtAccessSecret: string;
   private readonly jwtRefreshSecret: string;
+  private readonly jwtAccessExpire: string;
+  private readonly jwtRefreshExpire: string;
   constructor(
     private jwtService: JwtService,
     private usersService: UsersService,
@@ -21,6 +23,10 @@ export class AuthService {
     this.jwtAccessSecret = configService.get<string>('JWT_ACCESS_SECRET') || '';
     this.jwtRefreshSecret =
       configService.get<string>('JWT_REFRESH_SECRET') || '';
+    this.jwtAccessExpire =
+      configService.get<string>('JWT_ACCESS_EXPIRE') || '15m';
+    this.jwtRefreshExpire =
+      configService.get<string>('JWT_REFRESH_EXPIRE') || '7d';
   }
 
   async signup(dto: SignupDto) {
@@ -90,12 +96,12 @@ export class AuthService {
         { userId, email },
         {
           secret: this.jwtAccessSecret,
-          expiresIn: 10,
+          expiresIn: this.jwtAccessExpire,
         },
       ),
       this.jwtService.signAsync(
         { userId, email },
-        { secret: this.jwtRefreshSecret, expiresIn: '7d' },
+        { secret: this.jwtRefreshSecret, expiresIn: this.jwtRefreshExpire },
       ),
     ]);
     return { accessToken, refreshToken };

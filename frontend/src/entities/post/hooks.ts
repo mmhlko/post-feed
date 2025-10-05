@@ -6,6 +6,7 @@ import {
   PostsResponse,
   Post,
 } from './types';
+import { CONSTANTS } from '@/shared/config';
 
 export const POST_QUERY_KEYS = {
   posts: ['posts'] as const,
@@ -22,7 +23,7 @@ export const usePostsInfinite = (sort: 'asc' | 'desc' = 'desc') => {
   >({
     queryKey: [...POST_QUERY_KEYS.posts, 'sort', sort],
     queryFn: ({ pageParam = 0 }) =>
-      postApi.getPosts({ limit: 5, offset: pageParam, sort }),
+      postApi.getPosts({ limit: CONSTANTS.POSTS_PER_PAGE, offset: pageParam, sort }),
     initialPageParam: 0,
     getNextPageParam: (lastPage, allPages) => {
       const loaded = allPages.flatMap(p => p.items).length;

@@ -8,10 +8,10 @@ interface AxiosRequestConfigWithRetry extends AxiosRequestConfig {
 export const apiClient = axios.create({
   baseURL: import.meta.env.VITE_API_BASE_URL,
   timeout: 10000,
-  withCredentials: true, // обязательно для httpOnly cookie
+  withCredentials: true, // for httpOnly cookie
 });
 
-// --- Request interceptor: ставим access token из zustand ---
+// --- Request interceptor: set access token from Zustand ---
 apiClient.interceptors.request.use((config) => {
   const token = getAuthStore().token;
   
@@ -21,11 +21,11 @@ apiClient.interceptors.request.use((config) => {
   return config;
 });
 
-// --- Response interceptor: для refresh ---
+// --- Response interceptor: for refresh ---
 let isRefreshing = false;
-let failedQueue: Array<{ resolve: (token?: string) => void; reject: (err?: any) => void }> = [];
+let failedQueue: Array<{ resolve: (token?: string) => void; reject: (err?: unknown) => void }> = [];
 
-function processQueue(error: any, token: string | null = null) {
+function processQueue(error: unknown, token: string | null = null) {
   failedQueue.forEach((prom) => {
     if (error) prom.reject(error);
     else prom.resolve(token);
@@ -51,16 +51,15 @@ apiClient.interceptors.response.use(
       isRefreshing = true;
 
       try {
-        const res = await apiClient.get('/auth/refresh'); // cookie отправляется автоматически
+        const res = await apiClient.get('/auth/refresh'); // cookie auto send
 
         const newToken = res.data?.accessToken;
 
         if (!newToken) throw new Error('No access token returned');
 
-        // обновляем token в zustand
+        // update new token in zustand
         getAuthStore().setToken(newToken);
 
-        // ставим токен в дефолтные заголовки и в текущий запрос
         apiClient.defaults.headers.common['Authorization'] = `Bearer ${newToken}`;
         originalRequest.headers.Authorization = `Bearer ${newToken}`;
 
@@ -70,7 +69,7 @@ apiClient.interceptors.response.use(
       } catch (err) {
         processQueue(err, null);
         getAuthStore().logout();
-        // window.location.href = '/signup';
+        window.location.href = '/signup';
         return Promise.reject(err);
       } finally {
         isRefreshing = false;

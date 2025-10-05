@@ -9,11 +9,11 @@ export const formatDate = (date: string | Date, type?: 'birth' | 'full') => {
   const dateObj = typeof date === 'string' ? new Date(date) : date;
 
   if (type === 'birth') {
-    // возвращаем только yyyy-MM-dd
+    // return only yyyy-MM-dd
     return dateObj.toISOString().split('T')[0];
   }
 
-  // по умолчанию форматируем с датой и временем
+  // default format
   return new Intl.DateTimeFormat('en-US', {
     year: 'numeric',
     month: 'short',

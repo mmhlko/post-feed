@@ -39,7 +39,7 @@ export const PostsFeed = () => {
     usePostsInfinite(sortBy === "newest" ? "desc" : "asc");
 
   const deletePostMutation = useDeletePost();
-  // Собираем плоский массив постов
+  // Build a flat array of posts
   const posts = data?.pages.flatMap((page) => page.items) ?? [];
 
   const handleLoadMore = () => {

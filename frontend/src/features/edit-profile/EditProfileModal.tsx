@@ -13,6 +13,7 @@ import { Textarea } from "@/shared/ui/textarea";
 import { Label } from "@/shared/ui/label";
 import { useToast } from "@/hooks/use-toast";
 import { formatDate } from "@/shared/lib/utils";
+import { CONSTANTS } from "@/shared/config";
 
 interface EditProfileModalProps {
   open: boolean;
@@ -144,10 +145,10 @@ export const EditProfileModal = ({
                 setFormData((prev) => ({ ...prev, about: e.target.value }))
               }
               rows={4}
-              maxLength={500}
+              maxLength={CONSTANTS.MAX_BIO_LENGTH}
             />
             <p className="text-sm text-muted-foreground">
-              {formData.about.length}/500
+              {formData.about.length}/{CONSTANTS.MAX_BIO_LENGTH}
             </p>
           </div>
 

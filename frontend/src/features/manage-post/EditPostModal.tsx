@@ -6,7 +6,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/shared/ui/di
 import { Button } from '@/shared/ui/button';
 import { Textarea } from '@/shared/ui/textarea';
 import { useToast } from '@/hooks/use-toast';
-import { config } from '@/shared/config';
+import { config, CONSTANTS } from '@/shared/config';
 
 interface UploadedFile {
   id: string;
@@ -67,8 +67,8 @@ export const EditPostModal = ({ open, onClose, post }: EditPostModalProps) => {
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = Array.from(e.target.files || []);
-    if (files.length + uploadedFiles.length > 5) {
-      toast({ title: "Warning", description: "Maximum 5 images allowed", variant: "destructive" });
+    if (files.length + uploadedFiles.length > CONSTANTS.MAX_IMAGES_PER_POST) {
+      toast({ title: "Warning", description: `Maximum ${CONSTANTS.MAX_IMAGES_PER_POST} images allowed`, variant: "destructive" });
       return;
     }
 
@@ -107,10 +107,10 @@ export const EditPostModal = ({ open, onClose, post }: EditPostModalProps) => {
             value={text}
             onChange={(e) => setText(e.target.value)}
             rows={4}
-            maxLength={1000}
+            maxLength={CONSTANTS.MAX_POST_LENGTH}
             className="resize-none"
           />
-          <p className="text-sm text-muted-foreground text-right">{text.length}/1000</p>
+          <p className="text-sm text-muted-foreground text-right">{text.length}/{CONSTANTS.MAX_POST_LENGTH}</p>
 
           <div className="space-y-3">
             {uploadedFiles.length > 0 && (
@@ -151,7 +151,7 @@ export const EditPostModal = ({ open, onClose, post }: EditPostModalProps) => {
                 className="w-full"
               >
                 <Plus className="h-4 w-4 mr-2" />
-                Add Images ({uploadedFiles.length}/5)
+                Add Images ({uploadedFiles.length}/{CONSTANTS.MAX_IMAGES_PER_POST})
               </Button>
             )}
           </div>
