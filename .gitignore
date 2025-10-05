@@ -157,3 +157,8 @@ data
 /backend/uploads
 
 coverage
+ 
+# allow example env files
+!.env.example
+!backend/.env.example
+!frontend/.env.example
