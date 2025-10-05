@@ -24,7 +24,7 @@ export class AuthService {
     this.jwtRefreshSecret =
       configService.get<string>('JWT_REFRESH_SECRET') || '';
     this.jwtAccessExpire =
-      configService.get<string>('JWT_ACCESS_EXPIRE') || '15m';
+      configService.get<string>('JWT_ACCESS_EXPIRE') || '5m';
     this.jwtRefreshExpire =
       configService.get<string>('JWT_REFRESH_EXPIRE') || '7d';
   }

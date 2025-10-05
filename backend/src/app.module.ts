@@ -22,7 +22,7 @@ import { PostImageModel } from './modules/posts/post-image.model';
         port: Number(configService.get<string>('POSTGRES_PORT')),
         username: configService.get<string>('POSTGRES_USER'),
         password: configService.get<string>('POSTGRES_PASSWORD'),
-        database: configService.get<string>('POSTGRES_NAME'),
+        database: configService.get<string>('POSTGRES_DB'),
         models: [UserModel, PostModel, PostImageModel],
         autoLoadModels: true,
         synchronize: true,
