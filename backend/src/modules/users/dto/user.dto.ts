@@ -1,5 +1,5 @@
 import { IsOptional, IsString, IsEmail, IsDate } from 'class-validator';
-import { Type } from 'class-transformer';
+import { Transform } from 'class-transformer';
 
 export class UpdateProfileDto {
   @IsOptional()
@@ -11,7 +11,12 @@ export class UpdateProfileDto {
   lastName?: string;
 
   @IsOptional()
-  @Type(() => Date)
+  @Transform(({ value }) => {
+    if (value === '' || value === null || value === undefined) return null;
+    if (value instanceof Date) return value;
+    const parsed = new Date(value);
+    return Number.isNaN(parsed.getTime()) ? value : parsed;
+  })
   @IsDate()
   birthDate?: Date;
 
