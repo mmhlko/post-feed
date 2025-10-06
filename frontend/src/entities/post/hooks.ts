@@ -89,13 +89,21 @@ export const useDeletePost = (sort: 'asc' | 'desc' = 'desc') => {
       queryClient.setQueryData<InfiniteData<PostsResponse, number>>(key, (oldData) => {
         if (!oldData) return oldData;
 
-        return {
-          ...oldData,
-          pages: oldData.pages.map((page) => ({
-            ...page,
-            items: page.items.filter((post) => post.id !== id),
-          })),
+        // Remove post from all pages
+        const updatedPages = oldData.pages.map((page) => ({
+          ...page,
+          items: page.items.filter((post) => post.id !== id),
+        }));
+
+        // Decrease total only in the last page
+        const lastPageIndex = updatedPages.length - 1;
+        const lastPage = updatedPages[lastPageIndex];
+        updatedPages[lastPageIndex] = {
+          ...lastPage,
+          total: Math.max(0, lastPage.total - 1),
         };
+
+        return { ...oldData, pages: updatedPages };
       });
     },
   });

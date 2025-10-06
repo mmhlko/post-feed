@@ -44,7 +44,7 @@ export const EditProfileModal = ({
         lastName: user.lastName,
         email: user.email,
         phone: user.phone || "",
-        birthDate: formatDate(user.birthDate, 'birth') || "",
+        birthDate: user.birthDate ? formatDate(user.birthDate, 'birth') : "",
         about: user.about || "",
       });
     }

@@ -35,6 +35,9 @@ export class PostsService {
           attributes: ['id', 'firstName', 'lastName', 'avatarUrl'],
         },
       ],
+      // When joining hasMany relations (images), the count can be inflated by JOIN duplicates.
+      // distinct ensures we count unique posts by primary key.
+      distinct: true,
       limit,
       offset,
       order,

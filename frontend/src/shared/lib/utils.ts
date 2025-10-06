@@ -5,8 +5,18 @@ export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
 }
 
-export const formatDate = (date: string | Date, type?: 'birth' | 'full') => {
+export const formatDate = (date: string | Date | null | undefined, type?: 'birth' | 'full') => {
+  // Handle null/undefined values
+  if (!date) {
+    return '';
+  }
+
   const dateObj = typeof date === 'string' ? new Date(date) : date;
+
+  // Check if the date is valid
+  if (isNaN(dateObj.getTime())) {
+    return '';
+  }
 
   if (type === 'birth') {
     // return only yyyy-MM-dd

@@ -14,7 +14,6 @@ services:
     volumes:
       - ./backend/uploads:/app/uploads
       - /app/node_modules
-      - ./backend:/app
     depends_on:
       postgres:
         condition: service_healthy
@@ -29,8 +28,8 @@ services:
     networks:
       - app-network
     volumes:
-      - /app/node_modules
       - ./frontend:/app
+      - /app/node_modules
 
   postgres:
     image: postgres:16

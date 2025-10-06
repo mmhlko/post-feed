@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Edit, Trash2 } from "lucide-react";
+import { Edit, Trash2, Loader2 } from "lucide-react";
 import { usePostsInfinite, useDeletePost } from "@/entities/post/hooks";
 import { CreatePostForm } from "@/features/manage-post/CreatePostForm";
 import { EditPostModal } from "@/features/manage-post/EditPostModal";
@@ -59,6 +59,16 @@ export const PostsFeed = () => {
     }
   };
 
+  if (isLoading) {
+    return (
+      <Card className="w-full">
+        <CardContent className="flex justify-center p-8">
+          <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+        </CardContent>
+      </Card>
+    );
+  }
+
   return (
     <div className="space-y-6">
       <CreatePostForm />
@@ -77,9 +87,8 @@ export const PostsFeed = () => {
               <p>No posts yet. Create your first post above!</p>
             </div>
           ) : (
-            <div className="space-y-6">
-              {posts.map((post) => (
-                posts.map((post) => (
+              <div className="space-y-6">
+                {posts.map((post) => (
                   <PostCard
                     key={post.id}
                     post={post}
@@ -87,12 +96,11 @@ export const PostsFeed = () => {
                     onEdit={setEditingPost}
                     onDelete={handleDeletePost}
                   />
-                ))
-              ))}
-            </div>
+                ))}
+              </div>
           )}
 
-          {hasNextPage && (
+          {hasNextPage && posts.length > 0 && (
             <div className="text-center pt-6">
               <Button
                 variant="outline"
@@ -100,7 +108,7 @@ export const PostsFeed = () => {
                 onClick={handleLoadMore}
                 disabled={isFetchingNextPage}
               >
-                {isFetchingNextPage ? "Loading..." : "Load More Posts"}
+                {isFetchingNextPage ? "Loading..." : "Load More"}
               </Button>
             </div>
           )}
